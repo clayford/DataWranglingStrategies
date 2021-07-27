@@ -1,9 +1,0 @@
-curve(dnorm(x), from = -3, to = 3, ylim = c(0,0.5))
-curve(dt(x, df = 30), from = -3, to = 3, col = "blue", add = TRUE)
-
-curve(dexp(x, rate = 20), from = 0, to = (1/7)*20)
-
-
-curve(df(x, df1 = 10, df2 = 10), from = 0, to = 3)
-curve(dchisq(x, df = 1), from = 0, to = 2*1)
-summary(lm(Fertility ~ . , data = swiss))
