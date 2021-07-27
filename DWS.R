@@ -1,4 +1,4 @@
-# Data Wrangling in R
+# Data Wrangling Strategies with R
 # Spring 2020
 # UVA Library - Research Data Services
 # Clay Ford
