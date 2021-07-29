@@ -1,5 +1,5 @@
 # Data Wrangling Strategies with R
-# Spring 2020
+# Fall 2021
 # UVA Library - Research Data Services
 # Clay Ford
 
@@ -9,22 +9,21 @@ library(tidyverse)
 library(lubridate)
 
 
-
 # Download Data for Workshop ----------------------------------------------
 
 # The data we'll use in this workshop is available in a 4 MB ZIP file on a
 # GitHub repository. The following code will download and unzip the file. Before
 # running the following code you may want to set your working directory to your
-# Desktop or a new folder with a name like "DWR_workshop".
+# Desktop or a new folder with a name like "DWS_workshop".
 
 # To set working directory: 
 # Session...Set Working Directory...Choose Directory...
 
-URL <- "https://github.com/clayford/DWR/raw/master/DWR_data.zip"
+URL <- "https://github.com/clayford/DataWranglingStrategies/raw/main/DWS_data.zip"
 d <- basename(URL)
 download.file(url = URL, destfile = d)
 unzip(d)
-setwd("DWR_data")
+setwd("DWS_data")
 rm(URL, d)
 
 
@@ -50,7 +49,13 @@ str(df)
 lst <- list(x, n, g, df)
 lst
 
-# We can also provide names
+# Use double brackets to extract list elements
+lst[[4]]
+
+# Using single brackets return the element in a list
+lst[4]
+
+# We can also name the elements of a list
 lst2 <- list(num = x, size = n, sex = g, data = df)
 lst2
 
@@ -58,7 +63,17 @@ lst2
 lst2$num
 lst2$data
 
+# Many statistical results are stored as a list. For example, a t-test.
+ttest <- t.test(1:10, y = 7:20)
+ttest$p.value
+ttest$statistic
+ttest$estimate
 
+
+# A data frame is a list with vectors of equal length.
+df$n
+df$g
+is.list(df)
 
 # Applying functions to lists ---------------------------------------------
 
@@ -78,20 +93,18 @@ mean(lst3$z)
 # The lapply() function allows us to "apply" a function to each list element
 lapply(lst3, mean)
 
-# The tidyverse function map() does the same thing
-map(lst3, mean)
-
 # sapply() does the same but simplifies the output
 sapply(lst3, mean)
 
-# The tidyverse requires a modified map function called map_dbl()
-map_dbl(lst3, mean)
+# Since a data frame is list, we can apply functions to it as well. For example,
+# apply the typeof function to each column. typeof tells us the type of object.
+lapply(df, typeof)
+sapply(df, typeof)
 
-
-# YOUR TURN #1 ------------------------------------------------------------
+# CODE ALONG 1 ------------------------------------------------------------
 
 # lapply and sapply the summary and quantile functions to lst3. How does sapply
-# simplify the result? Try the same with map() and map_df().
+# simplify the result?
 
 
 
@@ -143,7 +156,6 @@ list01
 bind_rows(list01)
 bind_rows(list01, .id = "source")
 
-# The extended example below demonstrates how this can be very handy.
 
 # column binding
 # ie, set data frames side-by-side
@@ -151,7 +163,7 @@ bind_rows(list01, .id = "source")
 # dplyr's bind_cols() works on data frames or a list of data frames. Rows are
 # matched by position, so all data frames must have the same number of rows.
 
-# pace dat01 and dat03 side-by-side
+# place dat01 and dat03 side-by-side
 bind_cols(dat01, dat03)
 
 # The following throws an error since the data frames do not share the same
@@ -165,7 +177,7 @@ bind_cols(dat01, dat02)
 setwd("stocks")
 # get file names
 stocks <- list.files()  
-# apply read.csv to each file name; return a list
+# apply read_csv to each file name; return a list
 stocks_ls <- lapply(stocks, read_csv)  
 
 # lapply(stocks, read_csv) essentially does the following:
@@ -188,13 +200,13 @@ names(stocks_ls)
 # argument to identify the stock in the final data frame.
 
 # name each list element (replace ".csv" with nothing);
-# str_remove() is a tidyverse function that removes the specified text pattern.
+# str_remove() is a stringr function that removes the specified text pattern.
 names(stocks_ls) <- str_remove(stocks, ".csv")
 names(stocks_ls)
 
 # Use bind_rows to combine all data frames in list to one data frame. Because
 # each list element has a name and we use the .id argument, a new column will be
-# created indicates the stock.
+# created that indicates the stock.
 stocks_df <- bind_rows(stocks_ls, .id = "stock")
 
 # Let's calculate change from opening to closing price each day
@@ -204,17 +216,46 @@ stocks_df$Change <- stocks_df$Open - stocks_df$Close
 head(stocks_df)
 
 
+# CODE ALONG 2 ------------------------------------------------------------
+
+# VA DOE: Public high school graduate and completer data for 2006 - 2016.
+# http://www.doe.virginia.gov/statistics_reports/research_data/index.shtml
+
+# Read in all CSV files and bind into one data frame called "grads_df".
+
+# TIP: look at one of the CSV files before starting. Do you need to use the .id
+# argument?
+setwd("../doe")
+
+filenames <- list.files()
+grads_lst <- lapply(filenames, read_csv)
+grads_df <- bind_rows(grads_lst)
+
 
 # Working with dates and times --------------------------------------------
 
 # We often want to calculate elapsed number of days or seconds. Or extract month
 # or day of week from a date, so we can compare quantities by month or day.
 
-# R allows to store dates as number of days since Jan 1, 1970, and times as
+# R allows us to store dates as number of days since Jan 1, 1970, and times as
 # number of seconds since Jan 1, 1970. The Jan 1, 1970 date is arbitrary. It
-# just allows to convert a date into a number that we can use for analysis.
+# just allows us to convert a date into a number that we can use for analysis.
 
-# The lubridate package provides functions for working with dates.
+# The lubridate package provides functions for working with dates. 
+
+# It provides a series of functions for parsing dates that are a permutation of
+# the letters m, d and y to represent the ordering of month, day and year.
+
+# Examples:
+date1 <- mdy("January 1, 2013")
+as.numeric(date1) # days since 1/1/1970
+date2 <- ymd("1776-07-04")
+as.numeric(date2)
+
+# Use wday, month, and year functions to extract components of date
+wday(date2, label = TRUE)
+month(date2, label = TRUE)
+year(date2)
 
 # Let's format the dates in stocks_df. The date is in the format day-month-year,
 # so we use the dmy function.
@@ -228,15 +269,20 @@ head(as.numeric(stocks_df$Date))
 # Having the Date properly formatted allows us to extract Day and Month with
 # ease.
 
-# Extract day of week and save into new column called "Day"
+# Extract day of week and save into new column called "Day"; label = TRUE uses
+# name of day instead of the number.
 stocks_df$Day <- wday(stocks_df$Date, label = TRUE)
 
-# Extract month of year and save into new column called "Month"
+# Extract month of year and save into new column called "Month"; label = TRUE
+# uses name of month instead of the number.
 stocks_df$Month <- month(stocks_df$Date, label = TRUE)
 
 
 # first six records
 head(stocks_df)
+
+# Formatting the date and extract day of week allows to easy create plots
+# involving time.
 
 # plot closing price over time for all stocks
 ggplot(stocks_df, aes(x = Date, y = Close, color = stock)) +
@@ -248,18 +294,30 @@ ggplot(stocks_df, aes(x = Day, y = Change)) +
   facet_wrap(~stock)
 
 
-# YOUR TURN #2 ------------------------------------------------------------
 
-# VA DOE: Public high school graduate and completer data for 2006 - 2016.
-# http://www.doe.virginia.gov/statistics_reports/research_data/index.shtml
+# CODE ALONG 3 ------------------------------------------------------------
 
-# Read in all CSV files and bind into one data frame called "grads_df".
+# NYPD Shooting Incident Data 
 
-# TIP: look at one of the CSV files before starting. Do you need to use the .id
-# argument?
-setwd("../doe")
+# List of every shooting incident that occurred in NYC going back to 2006
+# through the end of the previous calendar year.
+# https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic
 
+# import the file "NYPD_Shooting_Incident_Data__Historic_.csv", 
+# format the OCCUR_DATE column as a date,
+# create a column called OCCUR_DAY that lists day of week.
+# create a column called OCCUR_YEAR that lists year.
+# What day of the weeks do most shootings happen?
+# How are numbers of shooting changing over time?
 
+setwd("..")
+sid <- read.csv("NYPD_Shooting_Incident_Data__Historic_.csv") 
+sid$OCCUR_DATE <- mdy(sid$OCCUR_DATE)
+sid$OCCUR_DAY <- wday(sid$OCCUR_DATE, label = TRUE)
+sid$OCCUR_YEAR <- year(sid$OCCUR_DATE)
+
+barplot(table(sid$OCCUR_DAY))
+barplot(table(sid$OCCUR_YEAR))
 
 # Merging/Joining ---------------------------------------------------------
 
@@ -277,10 +335,8 @@ right <- data.frame(id=2:4,
 left; right
 left_join(left, right, by = "id")
 
-# Notice rows from the left data frame are recycled to match up with multiple id
-# matches in the right data frame. Also notice all rows from left are retained 
-# and NAs are created in the grp column where the left had no matching id. This is
-# why it's called a "left join".
+# Notice all rows from left are retained and NAs are created in the grp column
+# where the right had no matching id. This is why it's called a "left join".
 
 #### right join
 
@@ -289,24 +345,21 @@ left_join(left, right, by = "id")
 left; right
 right_join(left, right, by = "id")
 
-# Notice rows from the left data frame are recycled to match up with multiple id
-# matches in the right data frame. Also notice all rows from right are retained.
-# This is why it's called a "right join".
+# Notice all rows from right are retained and NAs are created in the grp column
+# where the left had no matching id. This is why it's called a "right join".
 
 #### inner join
 
-# If we want to retain only those rows with matching ids in both data sets, we
+# If we want to retain only those rows with matching ids in BOTH data sets, we
 # do an INNER JOIN.
 left; right
 inner_join(left, right, by = "id")
 
-# Notice y from the left data frame is recycled to match up with multiple id 
-# matches in the right data frame. Also notice only those records with matching
-# "by" variables are joined. 
+# Notice only those records with matching ids are joined.
 
 #### full join
 
-# If we wanted to merge all rows regardless of match, we do a FULL JOIN.
+# If we wanted to merge ALL rows regardless of match, we do a FULL JOIN.
 left; right
 full_join(left, right, by = "id")
 
@@ -337,7 +390,8 @@ left_join(left2, right2, by = c("id1", "id2"))
 
 # The examples above were clean: The keys had the same names. It's rarely that
 # simple in real life. Below is an example of how to merge data using multiple
-# keys with different names.
+# keys with different names. Same data as above but with different names for the
+# keys.
 
 left2 <- data.frame(id1 = c(1,1,2,2), 
                 id2 = c(1,2,1,2), 
@@ -358,9 +412,9 @@ left_join(left2, right2, by = c("id1" = "V1", "id2" = "V2"))
 
 
 
-# The tidyverse also provides functions for performing "filtering joins" which
-# is a way to check if rows in one data frame have (or do not have) membership
-# in another data frame.
+# The dplyr package also provides functions for performing "filtering joins"
+# which is a way to check if rows in one data frame have (or do not have)
+# membership in another data frame.
 
 # Once again let's create some fake data to demonstrate. 
 ages <- data.frame(id = 1:5, 
@@ -371,13 +425,13 @@ grp <- data.frame(ID = 1:3,
 
 #### semi join
 
-# all rows in ages that have a match in grp
+# I only want to keep rows in ages that have a match in grp
 ages; grp
 semi_join(ages, grp, by = c("id" = "ID"))
 
 #### anti join
 
-# all rows in ages that do NOT have a match in grp
+# I only want to keep rows in ages that do NOT have a match in grp
 ages; grp
 anti_join(ages, grp, by = c("id" = "ID"))
 
@@ -385,17 +439,13 @@ anti_join(ages, grp, by = c("id" = "ID"))
 
 # Extended example: merging stock data and Google trends data -------------
 
-# set working directory up one level to DWR_data/
-setwd("..")
-
 # read in historical stock data for Apple (obtained from Yahoo Finance)
 aapl <- read_csv("AAPL.csv")
 summary(aapl)
 head(aapl$Date)
 
-# format date
+# format date using mdy() function from the lubridate package
 aapl$Date <- mdy(aapl$Date)
-aapl$Day <- wday(aapl$Date, label = TRUE)
 summary(aapl)
 
 
@@ -405,9 +455,6 @@ gt <- read_csv("mac_book_pro_trends.csv",
                skip = 3, 
                col_names = c("Date","Interest"))
 summary(gt)
-
-# add Day column
-gt$Day <- wday(gt$Date, label = TRUE)
 
 # Let's merge the stock data with the Google Trends data. It appears we can
 # merge on Date.
@@ -420,10 +467,10 @@ inner_join(aapl, gt, by = "Date")
 # Sunday. No records in common by Date so inner_join returns an empty data
 # frame.
 
-table(aapl$Day)
-table(gt$Day)
+table(wday(aapl$Date, label = TRUE))
+table(wday(gt$Date, label = TRUE))
 
-# Simple hack: change google trends date to Monday by adding 1
+# Simple hack: change Google trends date to Monday by adding 1
 gt$Date <- gt$Date + 1
 table(wday(gt$Date, label = TRUE))
 
@@ -432,8 +479,7 @@ table(wday(gt$Date, label = TRUE))
 aapl_gt <- inner_join(aapl, gt, by = "Date")
 aapl_gt
 
-
-# Is there any association between google trends and closing price? Plot Closing
+# Is there any association between Google trends and closing price? Plot Closing
 # Price vs Interest and add a smooth trend line
 ggplot(aapl_gt, aes(x = Interest, y = Close)) + 
   geom_point() +
@@ -449,49 +495,69 @@ ggplot(aapl_gt, aes(x = Interest, y = Close)) +
 names <- c("Ford, MS", "Jones, PhD", "Martin, Phd", "Huck, MA, MLS")
 
 # pattern: first comma and everything after it
+# Here are two possible ways.
+str_remove(names, pattern = ", [a-zA-Z, ]+")
 str_remove(names, pattern = ", [[:print:]]+")
 
+# [a-zA-Z, ]+ = one or more of the letters Aa - Zz, comma, and space
 # [[:print:]]+ = one or more printable characters
+
+# See the slide deck for this workshop for a slightly deeper dive.
+
+# The R for Data Science book has a good overview of regular expressions:
+# https://r4ds.had.co.nz/strings.html
 
 # The suggested strategy for using regular expressions: know when you need them
 # and use Google and trial-and-error to create the right one.
 
 
-# YOUR TURN #3 ------------------------------------------------------------
+# CODE ALONG 4 ------------------------------------------------------------
 
-# Read in school population totals for all Virginia schools for the 2016-2017
-# year
+# Let's merge school population totals into our VA DOE data so we can calculate proportion of disadvantaged youth who completed high school.
+
+# (1) Read in school population totals for all Virginia schools for the
+# 2016-2017 year: va_schools_2016-2017.csv
+
+# (2) Remove non-alpha-numeric characters from column names using regular
+# expressions.
+
+# (3) Add leading 0s to DivNo and SchoolNo using the str_pad() function.
+# DinNo should be width 3 (eg "001")
+# SchoolNo should be width 4 (eg, "0001")
+
+# (4) Subset grads_df to only include rows where SCHOOL_YEAR == "2016-2017" and
+# name the new data frame "grads_df_2016_2017"
+
+# (5) Merge the grads_df_2016_2017 and va_schools data frames based on Division
+# and School Number such that all rows from grads_df_2016_2017 are retained.
+# Save the new data frame as va2016_2017
+
 va_schools  <- read_csv("va_schools_2016-2017.csv")
 names(va_schools)
 
-# Remove non-alpha-numeric characters from column names using regular
-# expressions.
-names(va_schools) <- str_remove_all(names(va_schools), pattern = "[[:punct:][:space:]]")
+names(va_schools) <- str_remove_all(names(va_schools), 
+                                    pattern = "[[:punct:][:space:]]")
 
 
-# Add leading 0s to DivNo and SchoolNo. 
-# DinNo should be width 3 (eg "001")
-# SchoolNo should be width 4 (eg, "0001")
-va_schools$DivNo <- str_pad(va_schools$DivNo, width = 3, side = "left", pad = "0")
-va_schools$SchoolNo <- str_pad(va_schools$SchoolNo, width = 4, side = "left", pad = "0")
+head(va_schools$DivNo)
+head(va_schools$SchoolNo)
 
-# Subset grads_df to only include rows where SCHOOL_YEAR == "2016-2017" and
-# name the new data frame "grads_df_2016_2017"
-grads_df_2016_2017 <- filter(grads_df, SCHOOL_YEAR == "2016-2017")
+va_schools$DivNo <- str_pad(va_schools$DivNo, width = 3, 
+                            side = "left", pad = "0")
+va_schools$SchoolNo <- str_pad(va_schools$SchoolNo, width = 4, 
+                               side = "left", pad = "0")
 
-# NOW YOUR TURN!
+grads_df_2016_2017 <- subset(grads_df, SCHOOL_YEAR == "2016-2017")
 
-# Merge the grads_df_2016_2017 and va_schools data frames based on Division
-# and School Number such that all rows from grads_df_2016_2017 are retained.
-# Save the new data frame as va2016_2017
+
 names(grads_df_2016_2017)[c(3,5)]
 names(va_schools)[c(1,3)]
 
+va2016_2017 <- left_join(grads_df_2016_2017, va_schools, 
+                         by = c("DIV_NUM" = "DivNo", "SCH_NUM" = "SchoolNo"))
 
-
-
-# Why do this merge? So we could find, say, schools with the highest rate of
-# economically disadvantaged completers who obtained a Standard Diploma.
+# When finished we can find schools with the highest rate of economically
+# disadvantaged completers who obtained a Standard Diploma.
 
 # First calculate percentage of completers; divide the completer count by number
 # of students in Grade 12
@@ -560,7 +626,7 @@ ggplot(long, aes(x = factor(test), y = score, color = name, group = name)) +
 
 #### reshape wide to long
 
-# The tidyr pacakge provides functions for reshaping data. To reshape wide data
+# The tidyr package provides functions for reshaping data. To reshape wide data
 # into long format we use the pivot_longer() function.
 
 wide
@@ -617,41 +683,45 @@ vignette("pivot", package = "tidyr")
 
 # If we examine the column headers of stocks_df we can see that we really have
 # five variables instead of seven: (1) Stock, (2) Date, (3) price type, (4)
-# price, and (5) volume. Below we use gather() to make the data "tidy".
+# price, and (5) volume. Below we use pivot_longer() to make the data "long".
 
-stocks_df
+head(stocks_df)
 stocks_df_long <- pivot_longer(stocks_df, Open:Close, names_to = "price_type", values_to =  "price")
 head(stocks_df_long)
 
-# With our data in "long" format we can create plots like this:
+# With our data in "long" format it's a little easier to create plots that show
+# both high and low prices.
 ggplot(filter(stocks_df_long, price_type %in% c("High","Low")), 
        aes(x = Date, y = price, color = price_type)) +
   geom_line() +
   facet_wrap(~stock, scales = "free") 
 
 
-# YOUR TURN #4 ------------------------------------------------------------
+# CODE ALONG 5 ------------------------------------------------------------
 
 
 # The file "mhp.csv" contains data on the number of patients in mental hospitals
 # (in thousands), by type of hospital, from 1904-1970. Each year's data was
 # estimated in July.
 
-mhp <- read.csv("mhp.csv")
-head(mhp)
+# (1) Read in the data.
 
-# Reshape mhp to have three columns: Year, HospitalType, and NumberPatients.
+# (2) Reshape mhp to have three columns: Year, HospitalType, and NumberPatients.
 # Save the new data frame as "mhp_long". The first few rows of mhp_long should
 # look like this:
 
 #   Year  HospitalType  NumberPatients
-# 1 1923       Federal              29
-# 2 1931       Federal              12
-# 3 1933       Federal              19
+# 1  1923 Federal                  29
+# 2  1923 State                   230
+# 3  1923 Private                   9
 
+mhp <- read.csv("mhp.csv")
+head(mhp)
 
-
-
+mhp_long <- pivot_longer(mhp, Federal:Private, 
+                         names_to = "HospitalType", 
+                         values_to = "NumberPatients")
+head(mhp_long)
 
 # If reshaped correctly, the following code should produce a plot with
 # State hospitals showing a steady increase through about 1955 and then a steep
@@ -673,6 +743,9 @@ ggplot(mhp_long, aes(x=Year, y=NumberPatients,
 
 # Virginia Department of Education:
 # http://www.doe.virginia.gov/statistics_reports/research_data/index.shtml
+
+# NYPD Shooting Incident Data (Historic) 
+# https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic
 
 # Steckel, Richard H. , "Patients in mental hospitals, by type of hospital:
 # 1904-1970 ." Table Bd212-216 in Historical Statistics of the United States,
@@ -696,13 +769,6 @@ ggplot(mhp_long, aes(x=Year, y=NumberPatients,
 # a collection of R packages that share common philosophies and are designed to 
 # work together." The tidyverse packages provide an alternative to the "Base R
 # way" of working with data, particularly (but not exclusively) data frames.
-
-# This post at Revolution Analytics nicely lays out the tidyverse philosophy: 
-# http://blog.revolutionanalytics.com/2016/09/tidyverse.html
-
-# As it says: "tidyverse puts a complete suite of modern data-handling tools 
-# into your R session, and provides an essential toolbox for any data scientist 
-# using R."
 
 # You can also learn more at http://tidyverse.org/ and by reading R for Data
 # Science at http://r4ds.had.co.nz/

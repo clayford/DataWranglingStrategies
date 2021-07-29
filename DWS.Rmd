@@ -206,7 +206,7 @@ str_to_title("day one")
 
 ```{r echo=TRUE}
 # find first - and replace with nothing
-str_remove(c("434-555-1212"), "-")
+str_remove("434-555-1212", "-")
 ```
 
 - `str_remove_all` finds all occurrences of specified pattern and removes it
@@ -214,7 +214,7 @@ str_remove(c("434-555-1212"), "-")
 
 ```{r echo=TRUE}
 # find all - and replace with nothing
-str_remove_all(c("434-555-1212"), "-")
+str_remove_all("434-555-1212", "-")
 ```
 
 
@@ -223,13 +223,13 @@ str_remove_all(c("434-555-1212"), "-")
 - `str_replace` finds first occurrence of specified pattern and replaces with specified text
 
 ```{r echo=TRUE}
-str_replace(c("434-555-1212"), "-", ".")
+str_replace("434-555-1212", "-", ".")
 ```
 
 - `str_replace_all` finds all occurrences of specified pattern and replaces with specified text
 
 ```{r echo=TRUE}
-str_replace_all(c("434-555-1212"), "-", ".")
+str_replace_all("434-555-1212", "-", ".")
 ```
 
 
