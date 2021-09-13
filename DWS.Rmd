@@ -2,9 +2,11 @@
 title: "Data Wrangling Strategies with R"
 author: "Clay Ford"
 date: "Fall 2021"
-output: 
-    beamer_presentation: 
-        fig_caption: false
+output: slidy_presentation
+# output: 
+#    beamer_presentation: 
+#        fig_caption: false
+
 ---
 
 ```{r setup, include=FALSE}
@@ -70,8 +72,8 @@ lapply(lst, mean)
 
 - When a date (eg, April 5, 1982) is formatted as a "date" in R, it becomes the number of days after (or before) January 1, 1970.
 - When a date-time (eg, April 5, 1982 1:15 PM) is formatted as a "date-time", it becomes the number of seconds after (or before) January 1, 1970.
-- This simplifies the calculation of time spans.
-- The `lubridate` pacakge helps us parse dates and date-times as well as perform calculations and conversions of such values.
+- This allows the calculation of time spans.
+- The `lubridate` package helps us parse dates and date-times as well as perform calculations and conversions of such values.
 
 ## Parsing dates
 
@@ -162,10 +164,10 @@ is.character(x)
 ## Character versus factor
 
 - Sometimes data that appear to be character are actually stored as a _factor_
-- factors are character data that are stored as integers but have character labels
-- factors are good for using character data in statistical modeling (eg, ANOVA, regression, etc)
+- Factors are character data that are stored as integers but have character labels
+- Factors are good for using character data in statistical modeling (eg, ANOVA, regression, etc)
 - If your character data is stored as a factor, R automatically handles conversion to dummy matrices necessary for statistical modeling routines
-- factors do not have quotes when printed to console
+- Factors do not have quotes when printed to console
 
 
 ## Factor data in R
@@ -327,11 +329,11 @@ str_replace(group, "(Group |grp |group )", "G")
 
 ## Column binding
 
-`bind_cols(data_frame_01, data_frame_02)`[^1]
+`bind_cols(data_frame_01, data_frame_02)`
 
 ![](img/bind_cols.jpg)
 
-[^1]: data frames must have the same number of rows.
+Note: data frames must have the same number of rows.
 
 
 ## Merging or Joining data frames
@@ -341,7 +343,13 @@ str_replace(group, "(Group |grp |group )", "G")
     + **Filtering join**: keep rows in one data frame based on having (or not having) membership in another data frame
 * Frequently used to combine two different sources of data. 
 * Example: merge subject demographic data with subject lab data
-* `dplyr` functions: `inner_join`, `left_join`, `right_join`, `full_join`, `semi_join`, `anti_join`
+* `dplyr` functions: 
+    + `inner_join`
+    + `left_join`
+    + `right_join`
+    + `full_join`
+    + `semi_join`
+    + `anti_join`
  
 
 ## Inner Join
@@ -374,7 +382,7 @@ Retain all rows in both data sets.
 
 
 
-![](img/full_join.jpg){height=250px}
+![](img/full_join.jpg)
 
 ## Semi Join
 
@@ -418,7 +426,7 @@ pivot_longer(wide_df, week1:week3,
 
 Free online edition of the O'Reilly book _R for Data Science_, by Garrett Grolemund and Hadley Wickham. 
 
-The UVa Library also has a physical copy.
+The UVA Library also has a physical copy.
 
 ## See also
 

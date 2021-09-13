@@ -11,7 +11,7 @@ library(lubridate)
 
 # Download Data for Workshop ----------------------------------------------
 
-# The data we'll use in this workshop is available in a 4 MB ZIP file on a
+# The data we'll use in this workshop is available in a 5 MB ZIP file on a
 # GitHub repository. The following code will download and unzip the file. Before
 # running the following code you may want to set your working directory to your
 # Desktop or a new folder with a name like "DWS_workshop".
