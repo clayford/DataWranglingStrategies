@@ -179,7 +179,7 @@ bind_cols(dat01, dat02)
 setwd("stocks")
 # get file names
 stocks <- list.files()  
-# apply read_csv to each file name; return a list
+# apply read_csv to each file name; returns a list
 stocks_ls <- lapply(stocks, read_csv)  
 
 # lapply(stocks, read_csv) essentially does the following:
@@ -211,10 +211,11 @@ names(stocks_ls)
 # created that indicates the stock.
 stocks_df <- bind_rows(stocks_ls, .id = "stock")
 
-# Let's calculate change from opening to closing price each day
-stocks_df$Change <- stocks_df$Open - stocks_df$Close
-
 # first six records
+head(stocks_df)
+
+# Let's calculate change from opening to closing price each day
+stocks_df$Change <- stocks_df$Close - stocks_df$Open
 head(stocks_df)
 
 
@@ -661,7 +662,9 @@ vignette("pivot", package = "tidyr")
 # price, and (5) volume. Below we use pivot_longer() to make the data "long".
 
 head(stocks_df)
-stocks_df_long <- pivot_longer(stocks_df, Open:Close, names_to = "price_type", values_to =  "price")
+stocks_df_long <- pivot_longer(stocks_df, Open:Close, 
+                               names_to = "price_type", 
+                               values_to =  "price")
 head(stocks_df_long)
 
 # With our data in "long" format it's a little easier to create plots that show
