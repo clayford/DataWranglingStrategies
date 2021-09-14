@@ -65,6 +65,7 @@ lst2$data
 
 # Many statistical results are stored as a list. For example, a t-test.
 ttest <- t.test(1:10, y = 7:20)
+ttest
 ttest$p.value
 ttest$statistic
 ttest$estimate
@@ -93,11 +94,12 @@ mean(lst3$z)
 # The lapply() function allows us to "apply" a function to each list element
 lapply(lst3, mean)
 
-# sapply() does the same but simplifies the output
+# sapply() does the same but tries to simplify the output
 sapply(lst3, mean)
 
 # Since a data frame is list, we can apply functions to it as well. For example,
 # apply the typeof function to each column. typeof tells us the type of object.
+df
 lapply(df, typeof)
 sapply(df, typeof)
 
@@ -223,13 +225,10 @@ head(stocks_df)
 
 # Read in all CSV files and bind into one data frame called "grads_df".
 
-# TIP: look at one of the CSV files before starting. Do you need to use the .id
+# TIP: look at one of the CSV files before starting. Do we need to use the .id
 # argument?
 setwd("../doe")
 
-filenames <- list.files()
-grads_lst <- lapply(filenames, read_csv)
-grads_df <- bind_rows(grads_lst)
 
 
 # Working with dates and times --------------------------------------------
@@ -259,11 +258,11 @@ year(date2)
 
 # Let's format the dates in stocks_df. The date is in the format day-month-year,
 # so we use the dmy function.
-head(stocks_df$Date)
+head(stocks_df)
 stocks_df$Date <- dmy(stocks_df$Date)
 
 # Dates print like character values but are actually numbers.
-head(stocks_df$Date)
+head(stocks_df)
 head(as.numeric(stocks_df$Date))
 
 # Having the Date properly formatted allows us to extract Day and Month with
@@ -312,12 +311,7 @@ ggplot(stocks_df, aes(x = Day, y = Change)) +
 
 setwd("..")
 sid <- read.csv("NYPD_Shooting_Incident_Data__Historic_.csv") 
-sid$OCCUR_DATE <- mdy(sid$OCCUR_DATE)
-sid$OCCUR_DAY <- wday(sid$OCCUR_DATE, label = TRUE)
-sid$OCCUR_YEAR <- year(sid$OCCUR_DATE)
 
-barplot(table(sid$OCCUR_DAY))
-barplot(table(sid$OCCUR_YEAR))
 
 # Merging/Joining ---------------------------------------------------------
 
@@ -532,29 +526,10 @@ str_remove(names, pattern = ", [[:print:]]+")
 # and School Number such that all rows from grads_df_2016_2017 are retained.
 # Save the new data frame as va2016_2017
 
-va_schools  <- read_csv("va_schools_2016-2017.csv")
-names(va_schools)
-
-names(va_schools) <- str_remove_all(names(va_schools), 
-                                    pattern = "[[:punct:][:space:]]")
 
 
-head(va_schools$DivNo)
-head(va_schools$SchoolNo)
-
-va_schools$DivNo <- str_pad(va_schools$DivNo, width = 3, 
-                            side = "left", pad = "0")
-va_schools$SchoolNo <- str_pad(va_schools$SchoolNo, width = 4, 
-                               side = "left", pad = "0")
-
-grads_df_2016_2017 <- subset(grads_df, SCHOOL_YEAR == "2016-2017")
 
 
-names(grads_df_2016_2017)[c(3,5)]
-names(va_schools)[c(1,3)]
-
-va2016_2017 <- left_join(grads_df_2016_2017, va_schools, 
-                         by = c("DIV_NUM" = "DivNo", "SCH_NUM" = "SchoolNo"))
 
 # When finished we can find schools with the highest rate of economically
 # disadvantaged completers who obtained a Standard Diploma.
@@ -715,13 +690,9 @@ ggplot(filter(stocks_df_long, price_type %in% c("High","Low")),
 # 2  1923 State                   230
 # 3  1923 Private                   9
 
-mhp <- read.csv("mhp.csv")
-head(mhp)
 
-mhp_long <- pivot_longer(mhp, Federal:Private, 
-                         names_to = "HospitalType", 
-                         values_to = "NumberPatients")
-head(mhp_long)
+
+
 
 # If reshaped correctly, the following code should produce a plot with
 # State hospitals showing a steady increase through about 1955 and then a steep
